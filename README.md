@@ -279,6 +279,107 @@ For other MCP-compatible clients, use this general configuration:
 - **Permission issues**: Ensure the MCP client has permission to execute Node.js
 - **Build errors**: Run `npm run build` to ensure the TypeScript is compiled
 
+## Docker Deployment
+
+### Quick Start with Docker
+
+1. **Build and run with Docker Compose**:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Access the server**:
+   - HTTP endpoint: `http://localhost:3000`
+   - Health check: `http://localhost:3000/health`
+
+### Docker Configuration
+
+The Docker setup includes:
+- Node.js 20 Alpine base image
+- Automatic TypeScript compilation
+- Health checks
+- Persistent data volume
+- Automatic restart on failure
+
+### Manual Docker Commands
+
+```bash
+# Build the image
+docker build -t form-mcp .
+
+# Run the container
+docker run -d \
+  --name form-mcp-server \
+  -p 3000:3000 \
+  -v $(pwd)/forms.json:/app/forms.json \
+  -v $(pwd)/data:/data \
+  --restart unless-stopped \
+  form-mcp
+```
+
+### Autostart on System Boot
+
+#### Using systemd (Linux)
+
+1. **Copy the service file**:
+   ```bash
+   sudo cp systemd/form-mcp.service /etc/systemd/system/
+   ```
+
+2. **Update the WorkingDirectory path**:
+   ```bash
+   sudo sed -i 's|/path/to/form-mcp|'$(pwd)'|g' /etc/systemd/system/form-mcp.service
+   ```
+
+3. **Enable and start the service**:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable form-mcp.service
+   sudo systemctl start form-mcp.service
+   ```
+
+4. **Check service status**:
+   ```bash
+   sudo systemctl status form-mcp.service
+   ```
+
+#### Using Docker restart policy
+
+The `docker-compose.yml` includes `restart: unless-stopped` which will:
+- Automatically restart the container if it crashes
+- Start the container on system boot (if Docker daemon starts on boot)
+- Keep the container stopped if you manually stop it
+
+### Data Persistence
+
+Form data is persisted in two locations:
+- `./forms.json`: Main form storage file
+- `./data/`: Additional data directory
+
+These are mounted as volumes to survive container restarts.
+
+### Updating the Container
+
+```bash
+# Pull latest changes
+git pull
+
+# Rebuild and restart
+docker-compose down
+docker-compose build
+docker-compose up -d
+```
+
+### Container Logs
+
+```bash
+# View logs
+docker-compose logs -f
+
+# View last 100 lines
+docker-compose logs --tail=100
+```
+
 ## Development
 
 ### Building

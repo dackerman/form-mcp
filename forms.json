@@ -1,0 +1,213 @@
+{
+  "63ea7110-3957-4d9d-a8a2-efcf6c820349": {
+    "schema": {
+      "title": "Sample Feedback Form",
+      "description": "Please fill out this form to help us test form-mcp functionality.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Full Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "message",
+          "label": "Your Feedback",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "rating",
+          "label": "Overall Experience",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Excellent",
+            "Good",
+            "Fair",
+            "Poor"
+          ]
+        },
+        {
+          "id": "subscribe",
+          "label": "Subscribe to our newsletter",
+          "type": "checkbox",
+          "required": false,
+          "options": [
+            "Yes, sign me up!"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "f8c63325-4d84-4232-87b2-e5342506deea": {
+    "schema": {
+      "title": "Test Form",
+      "description": "A simple form to test the form-mcp integration.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "feedback",
+          "label": "Feedback",
+          "type": "textarea",
+          "required": false
+        },
+        {
+          "id": "rating",
+          "label": "Rate your experience",
+          "type": "radio",
+          "required": false,
+          "options": [
+            "Excellent",
+            "Good",
+            "Average",
+            "Poor"
+          ]
+        },
+        {
+          "id": "subscribe",
+          "label": "Subscribe to our newsletter?",
+          "type": "checkbox",
+          "required": false,
+          "options": [
+            "Yes"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "8212d722-ab01-4eb5-a256-1810b1b1a80c": {
+    "schema": {
+      "title": "Favorite Things Survey",
+      "description": "Tell us about some of your favorite things!",
+      "fields": [
+        {
+          "id": "favorite_color",
+          "label": "What is your favorite color?",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "favorite_hobby",
+          "label": "What is your favorite hobby?",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "favorite_food",
+          "label": "What is your favorite food?",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pet_preference",
+          "label": "Do you prefer cats, dogs, or something else?",
+          "type": "radio",
+          "required": true,
+          "options": [
+            "Cats",
+            "Dogs",
+            "Something else"
+          ]
+        },
+        {
+          "id": "newsletter",
+          "label": "Would you like to receive our newsletter?",
+          "type": "checkbox",
+          "required": false,
+          "options": [
+            "Yes, sign me up!"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "4385d5cd-04c9-4a22-aaaa-e805dd2dc973": {
+    "schema": {
+      "title": "Favorite Things Survey",
+      "description": "A quick survey to learn about your favorites!",
+      "fields": [
+        {
+          "id": "favorite_color",
+          "label": "What is your favorite color?",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "favorite_season",
+          "label": "Which season do you like the most?",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Spring",
+            "Summer",
+            "Autumn",
+            "Winter"
+          ]
+        },
+        {
+          "id": "favorite_food",
+          "label": "What is your favorite food?",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "music_genres",
+          "label": "Which music genres do you enjoy? (Select all that apply)",
+          "type": "checkbox",
+          "required": false,
+          "options": [
+            "Pop",
+            "Rock",
+            "Jazz",
+            "Classical",
+            "Hip-Hop",
+            "Electronic"
+          ]
+        },
+        {
+          "id": "why_favorite",
+          "label": "Tell us why these are your favorites!",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    "responses": {
+      "favorite_color": "blue",
+      "favorite_season": "Summer",
+      "favorite_food": "spaghetti",
+      "music_genres": [
+        "Pop",
+        "Rock",
+        "Jazz",
+        "Electronic"
+      ],
+      "why_favorite": "Random!"
+    },
+    "submitted": true
+  }
+}

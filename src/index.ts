@@ -141,7 +141,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
         // Generate unique form ID
         const formId = uuidv4();
         const port = process.env.MCP_FORM_PORT || '3000';
-        const url = `http://localhost:${port}/forms/${formId}`;
+        const hostname = process.env.MCP_HOSTNAME || `http://localhost:${port}`;
+        const url = `${hostname}/forms/${formId}`;
         
         // Store form
         storage.setForm(formId, {
@@ -174,7 +175,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
           throw new Error("formId is required");
         }
         
-        const formData = storage.getForm(formId);
+        const formData = await storage.getForm(formId);
         
         if (!formData) {
           throw new Error(`Form with ID ${formId} not found`);
@@ -221,8 +222,10 @@ async function main() {
     // Set up graceful shutdown
     storage.setupGracefulShutdown();
     
-    // Start HTTP server
-    await startHttpServer();
+    // Start HTTP server only if not disabled
+    if (process.env.MCP_DISABLE_HTTP !== 'true') {
+      await startHttpServer();
+    }
     
     // Connect to MCP transport
     const transport = new StdioServerTransport();

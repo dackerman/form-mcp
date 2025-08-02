@@ -14,9 +14,9 @@ export function createHttpServer(): express.Application {
   app.use(express.json());
   
   // Serve form page
-  app.get('/forms/:id', (req, res) => {
+  app.get('/forms/:id', async (req, res) => {
     const formId = req.params.id;
-    const formData = storage.getForm(formId);
+    const formData = await storage.getForm(formId);
     
     if (!formData) {
       return res.status(404).send(`
@@ -61,9 +61,9 @@ export function createHttpServer(): express.Application {
   });
   
   // Handle form submission
-  app.post('/forms/:id', (req, res) => {
+  app.post('/forms/:id', async (req, res) => {
     const formId = req.params.id;
-    const formData = storage.getForm(formId);
+    const formData = await storage.getForm(formId);
     
     if (!formData) {
       return res.status(404).json({ error: 'Form not found' });

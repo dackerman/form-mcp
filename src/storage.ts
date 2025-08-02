@@ -34,8 +34,21 @@ export class Storage {
     this.save().catch(console.error);
   }
 
-  getForm(id: string): FormData | undefined {
+  async getForm(id: string): Promise<FormData | undefined> {
+    await this.reload();
     return this.forms.get(id);
+  }
+
+  private async reload(): Promise<void> {
+    if (existsSync(STORAGE_FILE)) {
+      try {
+        const data = await readFile(STORAGE_FILE, 'utf-8');
+        const formsData = JSON.parse(data);
+        this.forms = new Map(Object.entries(formsData));
+      } catch (error) {
+        console.error(`Error reloading forms from ${STORAGE_FILE}:`, error);
+      }
+    }
   }
 
   getAllForms(): Map<string, FormData> {
