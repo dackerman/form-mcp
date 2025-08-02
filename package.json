@@ -1,0 +1,40 @@
+{
+  "name": "mcp-form-server",
+  "version": "1.0.0",
+  "description": "MCP server for creating HTML forms and collecting responses",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-form-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "clean": "rm -rf dist",
+    "test": "tsc && node dist/test-client.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "forms",
+    "html",
+    "server"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.1",
+    "express": "^4.19.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
