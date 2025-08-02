@@ -173,6 +173,112 @@ Forms are stored in memory and persisted to `forms.json`. The server:
 - Input validation on both client and server
 - Required field enforcement
 
+## Connecting to MCP Clients
+
+### Claude Desktop
+
+1. **Open Configuration**:
+   - Open Claude Desktop Settings
+   - Navigate to "Developer" tab
+   - Click "Edit Config" to open the configuration file
+
+2. **Configuration File Location**:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+3. **Add Server Configuration**:
+   ```json
+   {
+     "mcpServers": {
+       "form-server": {
+         "command": "node",
+         "args": ["/path/to/form-mcp/dist/index.js"],
+         "env": {
+           "MCP_FORM_PORT": "3000"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Restart Claude Desktop** to load the new configuration
+
+### Cursor
+
+[![Add to Cursor](https://cursor.directory/api/badge/mcp)](https://cursor.directory/mcp/form-mcp)
+
+1. **Open MCP Settings**:
+   - Open command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+   - Search for "Cursor Settings"
+   - Navigate to Features → Model Context Protocol
+
+2. **Configuration Options**:
+   
+   **Global Configuration** (`~/.cursor/mcp.json`):
+   ```json
+   {
+     "mcpServers": {
+       "form-server": {
+         "command": "node",
+         "args": ["/path/to/form-mcp/dist/index.js"],
+         "env": {
+           "MCP_FORM_PORT": "3000"
+         }
+       }
+     }
+   }
+   ```
+   
+   **Project-Specific Configuration** (`.cursor/mcp.json` in project root):
+   ```json
+   {
+     "mcpServers": {
+       "form-server": {
+         "command": "node",
+         "args": ["./dist/index.js"],
+         "env": {
+           "MCP_FORM_PORT": "3000"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Enable the Server**:
+   - Toggle the server on in MCP settings
+   - Look for a green dot indicating successful connection
+
+### Other MCP Clients
+
+For other MCP-compatible clients, use this general configuration:
+
+```json
+{
+  "mcpServers": {
+    "form-server": {
+      "command": "node",
+      "args": ["/absolute/path/to/form-mcp/dist/index.js"],
+      "env": {
+        "MCP_FORM_PORT": "3000"
+      }
+    }
+  }
+}
+```
+
+### Prerequisites
+
+- Node.js installed on your system
+- Form MCP server built (`npm run build`)
+- Absolute path to the compiled server (`dist/index.js`)
+
+### Troubleshooting
+
+- **Server not connecting**: Ensure the path to `dist/index.js` is correct and absolute
+- **Port conflicts**: Change `MCP_FORM_PORT` if port 3000 is in use
+- **Permission issues**: Ensure the MCP client has permission to execute Node.js
+- **Build errors**: Run `npm run build` to ensure the TypeScript is compiled
+
 ## Development
 
 ### Building
