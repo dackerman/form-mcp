@@ -253,5 +253,192 @@
     },
     "responses": null,
     "submitted": false
+  },
+  "b3c1602a-3ea7-4ed9-b710-8c27a40d0c39": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "A simple demo form for testing purposes.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "feedback",
+          "label": "Feedback",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "c0460347-db3e-4e88-bc3e-c1dcfcc27201": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "A simple demo form for testing form-mcp.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "age",
+          "label": "Age",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "subscribe",
+          "label": "Subscribe to newsletter",
+          "type": "checkbox",
+          "required": false,
+          "options": [
+            "Yes"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "351f218a-17e5-4ed5-85b5-31e8bef4f5c3": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "A short form for testing purposes.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "favoriteColor",
+          "label": "Favorite Color",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Red",
+            "Green",
+            "Blue"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "8b280188-65fc-42e6-8e49-2ecd37f7bcc0": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "Test form for form-mcp functionality. Please fill out the fields below.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "age",
+          "label": "Age",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "b19ff635-f0d4-449d-9551-354a90af36b3": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "A simple form for demo purposes.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "age",
+          "label": "Age",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "7634fe18-0c65-414e-a358-caca81e0c819": {
+    "schema": {
+      "title": "Demo Form",
+      "description": "This is a sample form for testing form-mcp functionality.",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "favorite_color",
+          "label": "Favorite Color",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Red",
+            "Green",
+            "Blue"
+          ]
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
   }
 }

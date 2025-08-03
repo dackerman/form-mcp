@@ -113,6 +113,28 @@ pnpm start
 MCP_TRANSPORT=streamable-http MCP_HTTP_PORT=3002 MCP_FORM_PORT=3000 pnpm start
 ```
 
+### Rebuilding and Restarting After Changes
+
+When you make changes to the form-mcp server, you need to rebuild the Docker container and restart LibreChat:
+
+```bash
+# In the form-mcp directory, rebuild the Docker container
+docker compose build
+
+# In the LibreChat directory, restart the services
+cd ~/code/LibreChat
+docker compose up -d form-mcp && docker compose restart
+
+# Alternative: restart specific services only
+docker compose restart form-mcp api
+```
+
+**Note:** The `docker compose up -d form-mcp && docker compose restart` command ensures that:
+1. The form-mcp container is recreated with any new environment variables
+2. All services are restarted to pick up the changes
+3. LibreChat reconnects to the updated MCP server
+4. New tool schemas are properly loaded
+
 ### Environment Variables
 ```bash
 # Transport configuration
@@ -124,6 +146,23 @@ MCP_HOSTNAME=http://localhost:3000  # Form URL hostname
 # Development options
 MCP_DISABLE_HTTP=true         # Disable form rendering (MCP only)
 ```
+
+#### Custom Hostname Configuration
+
+To use a custom hostname (e.g., for Tailscale or reverse proxy setups), set the `MCP_HOSTNAME` environment variable in your LibreChat configuration:
+
+```yaml
+# In librechat.yaml
+mcpServers:
+  form-mcp:
+    type: streamable-http
+    url: http://form-mcp:3002/mcp
+    timeout: 60000
+    env:
+      MCP_HOSTNAME: "http://homoiconicity.tail663e6.ts.net:3000"
+```
+
+This ensures that form URLs use your custom domain instead of localhost.
 
 ### Docker Build
 ```bash

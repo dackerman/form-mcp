@@ -40,6 +40,7 @@ npm run dev
 ### Environment Variables
 
 - `MCP_FORM_PORT`: Port for the HTTP server (default: 3000)
+- `MCP_HOSTNAME`: Base URL for form links (default: `http://localhost:PORT`)
 
 ### MCP Tools
 
@@ -247,6 +248,30 @@ Forms are stored in memory and persisted to `forms.json`. The server:
 3. **Enable the Server**:
    - Toggle the server on in MCP settings
    - Look for a green dot indicating successful connection
+
+### LibreChat
+
+For LibreChat, configure the MCP server with a custom hostname:
+
+```json
+{
+  "mcpServers": {
+    "form-server": {
+      "command": "node",
+      "args": ["/path/to/form-mcp/dist/index.js"],
+      "env": {
+        "MCP_FORM_PORT": "3000",
+        "MCP_HOSTNAME": "http://homoiconicity.tail663e6.ts.net:3000"
+      }
+    }
+  }
+}
+```
+
+The `MCP_HOSTNAME` environment variable allows you to specify the full URL that will be used in form links, which is particularly useful when:
+- Running behind a reverse proxy
+- Using a custom domain or subdomain
+- Accessing the server from a different network
 
 ### Other MCP Clients
 
