@@ -209,5 +209,49 @@
       "why_favorite": "Random!"
     },
     "submitted": true
+  },
+  "ea4c711d-920a-4c1e-a606-c30648ea017f": {
+    "schema": {
+      "title": "Test HTTP Form",
+      "description": "Testing streamable-http MCP transport",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "feedback",
+          "label": "Feedback",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
+  },
+  "1029b4ca-6400-4308-9961-26f90cf80e24": {
+    "schema": {
+      "title": "Streamable HTTP Test",
+      "description": "Testing streamable-http MCP transport",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "email",
+          "label": "Email",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    "responses": null,
+    "submitted": false
   }
 }

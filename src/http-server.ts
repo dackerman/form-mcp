@@ -7,7 +7,7 @@ import {
   generateAlreadySubmittedHTML 
 } from './form-generator.js';
 
-export function createHttpServer(): express.Application {
+export async function createHttpServer(): Promise<express.Application> {
   const app = express();
   
   app.use(express.urlencoded({ extended: true }));
@@ -163,11 +163,11 @@ function validateFormData(schema: FormSchema, data: Record<string, any>): {
 }
 
 export async function startHttpServer(): Promise<void> {
-  const app = createHttpServer();
+  const app = await createHttpServer();
   const port = parseInt(process.env.MCP_FORM_PORT || '3000', 10);
   
   return new Promise((resolve, reject) => {
-    const server = app.listen(port, (err?: Error) => {
+    const server = app.listen(port, '0.0.0.0', (err?: Error) => {
       if (err) {
         reject(err);
       } else {
