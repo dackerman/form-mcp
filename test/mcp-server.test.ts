@@ -102,10 +102,13 @@ describe("MCP Form Server", () => {
 
     const postResponse = await fetch(createFormResult.url, {
       method: "POST",
-      body: JSON.stringify({
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
         name: "Test name value",
-        csrf_token: csrfToken,
-      }),
+        csrf_token: csrfToken ?? "",
+      }).toString(),
     });
     expect(postResponse.status).toBe(200);
 

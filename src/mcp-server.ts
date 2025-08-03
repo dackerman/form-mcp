@@ -97,21 +97,19 @@ function createServer({
       description:
         "Get the submission status and responses for a form by its ID",
       inputSchema: {
-        schema: z
-          .object({
-            formId: z
-              .string()
-              .describe("The ID of the form to retrieve responses for"),
-          })
-          .describe("Parameters for retrieving form responses"),
+        formId: z
+          .string()
+          .describe("The ID of the form to retrieve responses for"),
       },
     },
-    async ({ schema }) => {
+    async ({ formId }) => {
       try {
-        const formData = inMemoryStorage.get(schema.formId);
+        console.log("getting responses for formId", formId);
+        const formData = inMemoryStorage.get(formId);
+        console.log("formData", formData);
 
         if (!formData) {
-          throw new Error(`Form with ID ${schema.formId} not found`);
+          throw new Error(`Form with ID ${formId} not found`);
         }
 
         const response = {

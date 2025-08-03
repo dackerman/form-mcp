@@ -84,6 +84,8 @@ export function registerHttpEndpoints(
       return res.status(403).json({ error: "Invalid CSRF token" });
     }
 
+    console.log("req.body", req.body);
+
     // Validate form data
     const { errors, responses } = validateFormData(formData.schema, req.body);
 
@@ -96,6 +98,7 @@ export function registerHttpEndpoints(
     formData.response = responses;
 
     console.error(`Form ${formId} submitted successfully`);
+    console.log("form data is now", formData);
 
     // Show success page
     res.send(generateSuccessHTML(formData.schema));
