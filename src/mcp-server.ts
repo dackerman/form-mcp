@@ -5,10 +5,18 @@ import express from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { registerHttpEndpoints } from "./http-server.js";
-import { storage } from "./storage.js";
-import { CreateFormResponse, GetResponsesResponse } from "./types.js";
+import { FormSchema, schemaType } from "./types.js";
 
-function createServer({ url }: { url: string }) {
+function createServer({
+  url,
+  inMemoryStorage,
+}: {
+  url: string;
+  inMemoryStorage: Map<
+    string,
+    { schema: FormSchema; response: Record<string, any> | null }
+  >;
+}) {
   // Create the MCP server
   const server = new McpServer(
     {
@@ -30,43 +38,7 @@ function createServer({ url }: { url: string }) {
       description:
         "Create a new HTML form with the provided schema and return a form ID and URL",
       inputSchema: {
-        schema: z
-          .object({
-            title: z.string().describe("The title of the form"),
-            description: z
-              .string()
-              .optional()
-              .describe("Optional description for the form"),
-            fields: z
-              .array(
-                z.object({
-                  id: z
-                    .string()
-                    .optional()
-                    .describe("Unique identifier for the field"),
-                  label: z.string().describe("Display label for the field"),
-                  type: z
-                    .enum([
-                      "text",
-                      "textarea",
-                      "select",
-                      "radio",
-                      "checkbox",
-                      "email",
-                    ])
-                    .describe("Type of the form field"),
-                  required: z
-                    .boolean()
-                    .describe("Whether the field is required"),
-                  options: z
-                    .array(z.string())
-                    .optional()
-                    .describe("Options for select, radio, or checkbox fields"),
-                })
-              )
-              .describe("Array of form fields"),
-          })
-          .describe("The form schema object"),
+        schema: schemaType,
       },
     },
     async ({ schema }) => {
@@ -82,10 +54,16 @@ function createServer({ url }: { url: string }) {
 
         console.error(`Created form ${formId}: ${schema.title}`);
 
-        const response: CreateFormResponse = {
+        const response = {
           formId,
-          url,
+          url: `${url}/${formId}`,
         };
+
+        console.log("setting form in memory storage", formId, schema);
+        inMemoryStorage.set(formId, {
+          schema,
+          response: null,
+        });
 
         return {
           content: [
@@ -130,15 +108,15 @@ function createServer({ url }: { url: string }) {
     },
     async ({ schema }) => {
       try {
-        const formData = await storage.getForm(schema.formId);
+        const formData = inMemoryStorage.get(schema.formId);
 
         if (!formData) {
           throw new Error(`Form with ID ${schema.formId} not found`);
         }
 
-        const response: GetResponsesResponse = {
-          submitted: formData.submitted,
-          responses: formData.responses,
+        const response = {
+          submitted: !!formData.response,
+          responses: formData.response,
         };
 
         return {
@@ -178,6 +156,14 @@ export function createMcpServer({
   hostname?: string;
   https?: boolean;
 }) {
+  const inMemoryStorage = new Map<
+    string,
+    {
+      schema: FormSchema;
+      response: Record<string, any> | null;
+    }
+  >();
+
   const app = express();
   app.use(express.json());
 
@@ -216,6 +202,7 @@ export function createMcpServer({
 
       const server = createServer({
         url: `${https ? "https" : "http"}://${hostname}:${port}/forms`,
+        inMemoryStorage,
       });
 
       // Connect to the MCP server
@@ -252,7 +239,7 @@ export function createMcpServer({
     await transport.handleRequest(req, res);
   };
 
-  registerHttpEndpoints(app);
+  registerHttpEndpoints(app, inMemoryStorage);
 
   // Handle GET requests for server-to-client notifications via SSE
   app.get("/mcp", handleSessionRequest);

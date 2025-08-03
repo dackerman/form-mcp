@@ -55,7 +55,7 @@ describe("MCP Form Server", () => {
     }
   });
 
-  it("should list available tools", async () => {
+  it("should basically work", async () => {
     const result = await client.listTools();
     expect(
       result.tools.filter((tool) => tool.name === "createForm")
@@ -63,5 +63,65 @@ describe("MCP Form Server", () => {
     expect(
       result.tools.filter((tool) => tool.name === "getResponses")
     ).toBeDefined();
+
+    const createFormText = await client.callTool({
+      name: "createForm",
+      arguments: {
+        title: "Test Form",
+        schema: {
+          title: "Test Form",
+          description: "Test Form Description",
+          fields: [
+            { id: "name", label: "Name", type: "text", required: false },
+          ],
+        },
+      },
+    });
+
+    const createFormResult = JSON.parse(
+      createFormText.content[0]?.text as string
+    ) as { formId: string; url: string };
+
+    expect(createFormResult.formId).toBeDefined();
+    expect(createFormResult.url).toBeDefined();
+
+    console.log("fetching url", createFormResult.url);
+    const response = await fetch(createFormResult.url);
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Test Form");
+    expect(html).toContain("Test Form Description");
+    expect(html).toContain("Name");
+    expect(html).toContain("text");
+    expect(html).toContain("required");
+    console.log("html", html);
+
+    const csrfToken = html.match(/csrf_token" value="([^"]+)"/)?.[1];
+    expect(csrfToken).toBeDefined();
+    console.log("csrfToken", csrfToken);
+
+    const postResponse = await fetch(createFormResult.url, {
+      method: "POST",
+      body: JSON.stringify({
+        name: "Test name value",
+        csrf_token: csrfToken,
+      }),
+    });
+    expect(postResponse.status).toBe(200);
+
+    const getResponsesResult = await client.callTool({
+      name: "getResponses",
+      arguments: {
+        formId: createFormResult.formId,
+      },
+    });
+    console.log("getResponsesResult", getResponsesResult);
+    const getResponsesResultJson = JSON.parse(
+      getResponsesResult.content[0]?.text as string
+    ) as { submitted: boolean; responses: Record<string, any> };
+    expect(getResponsesResultJson.submitted).toBe(true);
+    expect(getResponsesResultJson.responses).toEqual({
+      name: "Test name value",
+    });
   });
 });

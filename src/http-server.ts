@@ -1,20 +1,25 @@
 import express, { Express } from "express";
-import { storage } from "./storage.js";
-import { FormSchema } from "./types.js";
 import {
+  generateAlreadySubmittedHTML,
   generateFormHTML,
   generateSuccessHTML,
-  generateAlreadySubmittedHTML,
 } from "./form-generator.js";
+import { FormSchema } from "./types.js";
 
-export function registerHttpEndpoints(app: Express): express.Application {
+export function registerHttpEndpoints(
+  app: Express,
+  inMemoryStorage: Map<
+    string,
+    { schema: FormSchema; response: Record<string, any> | null }
+  >
+): express.Application {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
   // Serve form page
   app.get("/forms/:id", async (req, res) => {
     const formId = req.params.id;
-    const formData = await storage.getForm(formId);
+    const formData = inMemoryStorage.get(formId);
 
     if (!formData) {
       return res.status(404).send(`
@@ -51,7 +56,7 @@ export function registerHttpEndpoints(app: Express): express.Application {
       `);
     }
 
-    if (formData.submitted) {
+    if (formData.response) {
       return res.send(generateAlreadySubmittedHTML(formData.schema));
     }
 
@@ -61,13 +66,16 @@ export function registerHttpEndpoints(app: Express): express.Application {
   // Handle form submission
   app.post("/forms/:id", async (req, res) => {
     const formId = req.params.id;
-    const formData = await storage.getForm(formId);
+    console.log("formId", formId);
+    const formData = inMemoryStorage.get(formId);
 
     if (!formData) {
+      console.error("Form not found", formId);
       return res.status(404).json({ error: "Form not found" });
     }
 
-    if (formData.submitted) {
+    if (formData.response) {
+      console.log("Form already submitted", formId);
       return res.send(generateAlreadySubmittedHTML(formData.schema));
     }
 
@@ -85,9 +93,7 @@ export function registerHttpEndpoints(app: Express): express.Application {
     }
 
     // Save responses
-    formData.responses = responses;
-    formData.submitted = true;
-    storage.setForm(formId, formData);
+    formData.response = responses;
 
     console.error(`Form ${formId} submitted successfully`);
 
@@ -97,7 +103,7 @@ export function registerHttpEndpoints(app: Express): express.Application {
 
   // Health check endpoint
   app.get("/health", (req, res) => {
-    res.json({ status: "ok", forms: storage.getAllForms().size });
+    res.json({ status: "ok", forms: inMemoryStorage.size });
   });
 
   return app;
