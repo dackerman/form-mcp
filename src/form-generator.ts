@@ -1,4 +1,4 @@
-import { FormSchema, FormField } from "./types.js";
+import { FormSchema } from "./types.js";
 
 export function generateFormHTML(
   formId: string,
@@ -181,7 +181,7 @@ export function generateFormHTML(
 }
 
 function generateFieldHTML(
-  field: FormField,
+  field: FormSchema["fields"][number],
   errors?: Record<string, string>
 ): string {
   const hasError = errors && errors[field.id];
