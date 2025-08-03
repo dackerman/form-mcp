@@ -182,6 +182,9 @@ export function createMcpServer({
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
     let transport: StreamableHTTPServerTransport;
 
+    console.log("sessionId", sessionId);
+    console.log("headers", req.headers);
+
     if (sessionId && transports[sessionId]) {
       // Reuse existing transport
       transport = transports[sessionId];
