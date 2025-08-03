@@ -8,15 +8,7 @@ import { registerHttpEndpoints } from "./http-server.js";
 import { storage } from "./storage.js";
 import { CreateFormResponse, GetResponsesResponse } from "./types.js";
 
-export function createMcpServer({
-  port = 3000,
-  hostname = `localhost`,
-  https = false,
-}: {
-  port?: number;
-  hostname?: string;
-  https?: boolean;
-}) {
+function createServer({ url }: { url: string }) {
   // Create the MCP server
   const server = new McpServer(
     {
@@ -87,7 +79,6 @@ export function createMcpServer({
       try {
         // Generate unique form ID
         const formId = randomUUID();
-        const url = `${https ? "https" : "http"}://${hostname}:${port}/forms/${formId}`;
 
         console.error(`Created form ${formId}: ${schema.title}`);
 
@@ -175,6 +166,18 @@ export function createMcpServer({
     }
   );
 
+  return server;
+}
+
+export function createMcpServer({
+  port = 3000,
+  hostname = `localhost`,
+  https = false,
+}: {
+  port?: number;
+  hostname?: string;
+  https?: boolean;
+}) {
   const app = express();
   app.use(express.json());
 
@@ -210,12 +213,10 @@ export function createMcpServer({
           delete transports[transport.sessionId];
         }
       };
-      const server = new McpServer({
-        name: "example-server",
-        version: "1.0.0",
-      });
 
-      // ... set up server resources, tools, and prompts ...
+      const server = createServer({
+        url: `${https ? "https" : "http"}://${hostname}:${port}/forms`,
+      });
 
       // Connect to the MCP server
       await server.connect(transport);
