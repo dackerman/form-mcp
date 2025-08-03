@@ -108,6 +108,9 @@ gradle-app.setting
 *.sqlite3
 *.db
 
+# Form data (runtime storage)
+forms.json
+
 # Backup files
 *.bak
 *.backup
