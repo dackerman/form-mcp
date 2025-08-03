@@ -1,8 +1,12 @@
-import { FormSchema, FormField } from './types.js';
+import { FormSchema, FormField } from "./types.js";
 
-export function generateFormHTML(formId: string, schema: FormSchema, errors?: Record<string, string>): string {
-  const port = process.env.MCP_FORM_PORT || '3000';
-  
+export function generateFormHTML(
+  formId: string,
+  schema: FormSchema,
+  errors?: Record<string, string>
+): string {
+  const port = process.env.MCP_FORM_PORT || "3000";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,12 +166,12 @@ export function generateFormHTML(formId: string, schema: FormSchema, errors?: Re
 <body>
   <div class="container">
     <h1>${escapeHtml(schema.title)}</h1>
-    ${schema.description ? `<div class="description">${escapeHtml(schema.description)}</div>` : ''}
+    ${schema.description ? `<div class="description">${escapeHtml(schema.description)}</div>` : ""}
     
     <form method="POST" action="/forms/${formId}">
       <input type="hidden" name="csrf_token" value="${formId}">
       
-      ${schema.fields.map(field => generateFieldHTML(field, errors)).join('')}
+      ${schema.fields.map((field) => generateFieldHTML(field, errors)).join("")}
       
       <button type="submit">Submit Form</button>
     </form>
@@ -176,59 +180,79 @@ export function generateFormHTML(formId: string, schema: FormSchema, errors?: Re
 </html>`;
 }
 
-function generateFieldHTML(field: FormField, errors?: Record<string, string>): string {
+function generateFieldHTML(
+  field: FormField,
+  errors?: Record<string, string>
+): string {
   const hasError = errors && errors[field.id];
-  const errorClass = hasError ? ' has-error' : '';
-  const requiredMark = field.required ? ' <span class="required">*</span>' : '';
-  
-  let fieldHTML = '';
-  
+  const errorClass = hasError ? " has-error" : "";
+  const requiredMark = field.required ? ' <span class="required">*</span>' : "";
+
+  let fieldHTML = "";
+
   switch (field.type) {
-    case 'text':
-      fieldHTML = `<input type="text" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
+    case "text":
+      fieldHTML = `<input type="text" id="${field.id}" name="${field.id}" ${field.required ? "required" : ""}>`;
       break;
-      
-    case 'textarea':
-      fieldHTML = `<textarea id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}></textarea>`;
+
+    case "textarea":
+      fieldHTML = `<textarea id="${field.id}" name="${field.id}" ${field.required ? "required" : ""}></textarea>`;
       break;
-      
-    case 'select':
-      fieldHTML = `<select id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>
+
+    case "select":
+      fieldHTML = `<select id="${field.id}" name="${field.id}" ${field.required ? "required" : ""}>
         <option value="">Please select...</option>
-        ${field.options?.map(option => 
-          `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`
-        ).join('') || ''}
+        ${
+          field.options
+            ?.map(
+              (option) =>
+                `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`
+            )
+            .join("") || ""
+        }
       </select>`;
       break;
-      
-    case 'radio':
+
+    case "radio":
       fieldHTML = `<div class="radio-group">
-        ${field.options?.map(option => `
+        ${
+          field.options
+            ?.map(
+              (option) => `
           <div class="radio-option">
-            <input type="radio" id="${field.id}_${sanitizeId(option)}" name="${field.id}" value="${escapeHtml(option)}" ${field.required ? 'required' : ''}>
+            <input type="radio" id="${field.id}_${sanitizeId(option)}" name="${field.id}" value="${escapeHtml(option)}" ${field.required ? "required" : ""}>
             <label for="${field.id}_${sanitizeId(option)}">${escapeHtml(option)}</label>
           </div>
-        `).join('') || ''}
+        `
+            )
+            .join("") || ""
+        }
       </div>`;
       break;
-      
-    case 'checkbox':
+
+    case "checkbox":
       fieldHTML = `<div class="checkbox-group">
-        ${field.options?.map(option => `
+        ${
+          field.options
+            ?.map(
+              (option) => `
           <div class="checkbox-option">
             <input type="checkbox" id="${field.id}_${sanitizeId(option)}" name="${field.id}" value="${escapeHtml(option)}">
             <label for="${field.id}_${sanitizeId(option)}">${escapeHtml(option)}</label>
           </div>
-        `).join('') || ''}
+        `
+            )
+            .join("") || ""
+        }
       </div>`;
       break;
   }
-  
+
   return `
     <div class="form-group${errorClass}">
       <label for="${field.id}">${escapeHtml(field.label)}${requiredMark}</label>
       ${fieldHTML}
-      ${hasError ? `<div class="error">${escapeHtml(errors[field.id])}</div>` : ''}
+      ${hasError ? `<div class="error">${escapeHtml(errors[field.id])}</div>` : ""}
     </div>
   `;
 }
@@ -343,13 +367,13 @@ export function generateAlreadySubmittedHTML(schema: FormSchema): string {
 
 function escapeHtml(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
 }
 
 function sanitizeId(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return text.toLowerCase().replace(/[^a-z0-9]/g, "_");
 }

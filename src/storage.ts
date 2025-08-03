@@ -1,8 +1,8 @@
-import { writeFile, readFile } from 'fs/promises';
-import { existsSync } from 'fs';
-import { FormData } from './types.js';
+import { writeFile, readFile } from "fs/promises";
+import { existsSync } from "fs";
+import { FormData } from "./types.js";
 
-const STORAGE_FILE = 'forms.json';
+const STORAGE_FILE = "forms.json";
 
 export class Storage {
   private forms = new Map<string, FormData>();
@@ -10,7 +10,7 @@ export class Storage {
   async init(): Promise<void> {
     if (existsSync(STORAGE_FILE)) {
       try {
-        const data = await readFile(STORAGE_FILE, 'utf-8');
+        const data = await readFile(STORAGE_FILE, "utf-8");
         const formsData = JSON.parse(data);
         this.forms = new Map(Object.entries(formsData));
         console.error(`Loaded ${this.forms.size} forms from ${STORAGE_FILE}`);
@@ -25,7 +25,7 @@ export class Storage {
       const formsData = Object.fromEntries(this.forms);
       await writeFile(STORAGE_FILE, JSON.stringify(formsData, null, 2));
     } catch (error) {
-      console.error('Error saving forms:', error);
+      console.error("Error saving forms:", error);
     }
   }
 
@@ -42,7 +42,7 @@ export class Storage {
   private async reload(): Promise<void> {
     if (existsSync(STORAGE_FILE)) {
       try {
-        const data = await readFile(STORAGE_FILE, 'utf-8');
+        const data = await readFile(STORAGE_FILE, "utf-8");
         const formsData = JSON.parse(data);
         this.forms = new Map(Object.entries(formsData));
       } catch (error) {
@@ -70,8 +70,8 @@ export class Storage {
       process.exit(0);
     };
 
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
   }
 }
 

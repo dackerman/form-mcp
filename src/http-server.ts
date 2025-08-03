@@ -1,23 +1,21 @@
-import express from 'express';
-import { storage } from './storage.js';
-import { FormSchema } from './types.js';
-import { 
-  generateFormHTML, 
-  generateSuccessHTML, 
-  generateAlreadySubmittedHTML 
-} from './form-generator.js';
+import express, { Express } from "express";
+import { storage } from "./storage.js";
+import { FormSchema } from "./types.js";
+import {
+  generateFormHTML,
+  generateSuccessHTML,
+  generateAlreadySubmittedHTML,
+} from "./form-generator.js";
 
-export async function createHttpServer(): Promise<express.Application> {
-  const app = express();
-  
+export function registerHttpEndpoints(app: Express): express.Application {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  
+
   // Serve form page
-  app.get('/forms/:id', async (req, res) => {
+  app.get("/forms/:id", async (req, res) => {
     const formId = req.params.id;
     const formData = await storage.getForm(formId);
-    
+
     if (!formData) {
       return res.status(404).send(`
         <!DOCTYPE html>
@@ -52,71 +50,74 @@ export async function createHttpServer(): Promise<express.Application> {
         </html>
       `);
     }
-    
+
     if (formData.submitted) {
       return res.send(generateAlreadySubmittedHTML(formData.schema));
     }
-    
+
     res.send(generateFormHTML(formId, formData.schema));
   });
-  
+
   // Handle form submission
-  app.post('/forms/:id', async (req, res) => {
+  app.post("/forms/:id", async (req, res) => {
     const formId = req.params.id;
     const formData = await storage.getForm(formId);
-    
+
     if (!formData) {
-      return res.status(404).json({ error: 'Form not found' });
+      return res.status(404).json({ error: "Form not found" });
     }
-    
+
     if (formData.submitted) {
       return res.send(generateAlreadySubmittedHTML(formData.schema));
     }
-    
+
     // CSRF protection
     if (req.body.csrf_token !== formId) {
-      return res.status(403).json({ error: 'Invalid CSRF token' });
+      return res.status(403).json({ error: "Invalid CSRF token" });
     }
-    
+
     // Validate form data
     const { errors, responses } = validateFormData(formData.schema, req.body);
-    
+
     if (Object.keys(errors).length > 0) {
       // Return form with errors
       return res.send(generateFormHTML(formId, formData.schema, errors));
     }
-    
+
     // Save responses
     formData.responses = responses;
     formData.submitted = true;
     storage.setForm(formId, formData);
-    
+
     console.error(`Form ${formId} submitted successfully`);
-    
+
     // Show success page
     res.send(generateSuccessHTML(formData.schema));
   });
-  
+
   // Health check endpoint
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', forms: storage.getAllForms().size });
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok", forms: storage.getAllForms().size });
   });
-  
+
   return app;
 }
 
-function validateFormData(schema: FormSchema, data: Record<string, any>): {
+function validateFormData(
+  schema: FormSchema,
+  data: Record<string, any>
+): {
   errors: Record<string, string>;
   responses: Record<string, any>;
 } {
   const errors: Record<string, string> = {};
   const responses: Record<string, any> = {};
-  
+
   for (const field of schema.fields) {
     const value = data[field.id];
-    
+
     // Handle different field types
-    if (field.type === 'checkbox') {
+    if (field.type === "checkbox") {
       // Checkboxes can have multiple values or be undefined
       if (value === undefined) {
         responses[field.id] = [];
@@ -125,57 +126,55 @@ function validateFormData(schema: FormSchema, data: Record<string, any>): {
       } else {
         responses[field.id] = [value];
       }
-      
+
       // Check required validation for checkboxes
       if (field.required && responses[field.id].length === 0) {
         errors[field.id] = `${field.label} is required`;
       }
     } else {
       // Handle other field types (text, textarea, select, radio)
-      responses[field.id] = value || '';
-      
+      responses[field.id] = value || "";
+
       // Check required validation
-      if (field.required && (!value || value.trim() === '')) {
+      if (field.required && (!value || value.trim() === "")) {
         errors[field.id] = `${field.label} is required`;
       }
-      
+
       // For radio buttons, validate that the value is one of the options
-      if (field.type === 'radio' && value && field.options && !field.options.includes(value)) {
+      if (
+        field.type === "radio" &&
+        value &&
+        field.options &&
+        !field.options.includes(value)
+      ) {
         errors[field.id] = `Invalid option selected for ${field.label}`;
       }
-      
+
       // For select fields, validate that the value is one of the options
-      if (field.type === 'select' && value && field.options && !field.options.includes(value)) {
+      if (
+        field.type === "select" &&
+        value &&
+        field.options &&
+        !field.options.includes(value)
+      ) {
         errors[field.id] = `Invalid option selected for ${field.label}`;
       }
     }
-    
+
     // For checkbox fields, validate that all values are valid options
-    if (field.type === 'checkbox' && field.options && responses[field.id].length > 0) {
-      const invalidOptions = responses[field.id].filter((val: string) => !field.options!.includes(val));
+    if (
+      field.type === "checkbox" &&
+      field.options &&
+      responses[field.id].length > 0
+    ) {
+      const invalidOptions = responses[field.id].filter(
+        (val: string) => !field.options!.includes(val)
+      );
       if (invalidOptions.length > 0) {
         errors[field.id] = `Invalid options selected for ${field.label}`;
       }
     }
   }
-  
-  return { errors, responses };
-}
 
-export async function startHttpServer(): Promise<void> {
-  const app = await createHttpServer();
-  const port = parseInt(process.env.MCP_FORM_PORT || '3000', 10);
-  
-  return new Promise((resolve, reject) => {
-    const server = app.listen(port, '0.0.0.0', (err?: Error) => {
-      if (err) {
-        reject(err);
-      } else {
-        console.error(`HTTP server running on port ${port}`);
-        resolve();
-      }
-    });
-    
-    server.on('error', reject);
-  });
+  return { errors, responses };
 }

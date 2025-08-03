@@ -1,7 +1,7 @@
 export interface FormField {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox';
+  type: "text" | "textarea" | "select" | "radio" | "checkbox";
   required: boolean;
   options?: string[];
 }
