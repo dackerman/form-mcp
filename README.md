@@ -1,430 +1,233 @@
-# MCP Form Server
+# Form MCP Server
 
-An MCP (Model Context Protocol) server that allows LLMs to create HTML forms, have users fill them out, and retrieve the responses.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that enables AI assistants to create HTML forms, collect user responses, and retrieve submission data. Perfect for gathering structured information from users during AI conversations.
 
-## Features
+## What It Does
 
-- **Create Forms**: LLMs can create forms using JSON schema definitions
-- **Collect Responses**: Users fill out forms via web interface
-- **Retrieve Data**: LLMs can retrieve submitted form responses
-- **Persistent Storage**: Forms and responses are saved to disk
-- **Professional UI**: Clean, responsive form interface
-- **Validation**: Client and server-side form validation
-- **Security**: CSRF protection and input sanitization
+- **🎯 Create Forms**: AI assistants can generate custom HTML forms with various field types
+- **📝 Collect Responses**: Users fill out forms through a clean web interface  
+- **📊 Retrieve Data**: AI assistants can check for submissions and access response data
+- **💾 Persistent Storage**: Forms and responses are automatically saved
+- **🔒 Secure**: CSRF protection and input validation included
 
-## Installation
+## Quick Start
 
-1. Clone or download this repository
-2. Install dependencies:
+### Installation
+
+1. **Install with pnpm** (recommended):
    ```bash
-   npm install
-   ```
-3. Build the TypeScript code:
-   ```bash
-   npm run build
+   git clone https://github.com/yourusername/form-mcp.git
+   cd form-mcp
+   pnpm install
+   pnpm build
    ```
 
-## Usage
+2. **Or with Docker**:
+   ```bash
+   git clone https://github.com/yourusername/form-mcp.git
+   cd form-mcp
+   docker compose up -d
+   ```
 
-### Running the Server
+### Configure Your AI Assistant
 
-```bash
-npm start
-```
+#### Claude Desktop
 
-Or for development:
-```bash
-npm run dev
-```
+Add to `claude_desktop_config.json`:
 
-### Environment Variables
-
-- `MCP_FORM_PORT`: Port for the HTTP server (default: 3000)
-- `MCP_HOSTNAME`: Base URL for form links (default: `http://localhost:PORT`)
-
-### MCP Tools
-
-The server provides two MCP tools:
-
-#### `createForm`
-
-Creates a new form and returns its ID and URL.
-
-**Input Schema:**
 ```json
 {
-  "schema": {
-    "title": "Contact Form",
-    "description": "Please fill out your contact information",
-    "fields": [
-      {
-        "id": "name",
-        "label": "Full Name",
-        "type": "text",
-        "required": true
-      },
-      {
-        "id": "email",
-        "label": "Email Address",
-        "type": "text",
-        "required": true
-      },
-      {
-        "id": "subject",
-        "label": "Subject",
-        "type": "select",
-        "required": true,
-        "options": ["General Inquiry", "Support", "Sales"]
-      },
-      {
-        "id": "message",
-        "label": "Message",
-        "type": "textarea",
-        "required": true
+  "mcpServers": {
+    "form-mcp": {
+      "command": "node",
+      "args": ["/absolute/path/to/form-mcp/dist/index.js"],
+      "env": {
+        "MCP_PORT": "3000"
       }
-    ]
+    }
   }
 }
 ```
 
-**Response:**
+**Config file locations:**
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+#### Cursor
+
+Add to `.cursor/mcp.json` or global `~/.cursor/mcp.json`:
+
 ```json
 {
-  "formId": "abc-123-def",
-  "url": "http://localhost:3000/forms/abc-123-def"
+  "mcpServers": {
+    "form-mcp": {
+      "command": "node", 
+      "args": ["/absolute/path/to/form-mcp/dist/index.js"],
+      "env": {
+        "MCP_PORT": "3000"
+      }
+    }
+  }
 }
 ```
 
-#### `getResponses`
+#### LibreChat
 
-Retrieves the submission status and responses for a form.
+Add to `librechat.yaml`:
 
-**Input:**
-```json
-{
-  "formId": "abc-123-def"
-}
+```yaml
+mcpServers:
+  form-mcp:
+    type: streamable-http
+    url: http://form-mcp:3002/mcp
+    timeout: 60000
+    serverInstructions: |
+      This server allows you to create HTML forms for users to fill out.
+      Use createForm to generate forms with various field types.
+      Use getResponses to check for submissions and retrieve data.
 ```
 
-**Response:**
+## How It Works
+
+### 1. AI Creates a Form
+
+The AI assistant uses the `createForm` tool with a schema:
+
+```
+Create a contact form with name, email, subject dropdown, and message fields.
+```
+
+### 2. User Fills Out Form
+
+The AI provides a URL like `http://localhost:3000/forms/abc-123` where users can:
+- Fill out the form fields
+- Submit once (forms lock after submission)
+- See a confirmation message
+
+### 3. AI Retrieves Responses
+
+The AI uses `getResponses` to check if the form was submitted and get the data:
+
 ```json
 {
   "submitted": true,
   "responses": {
     "name": "John Doe",
-    "email": "john@example.com",
+    "email": "john@example.com", 
     "subject": "General Inquiry",
     "message": "Hello, I have a question..."
   }
 }
 ```
 
-### Form Field Types
+## Supported Form Fields
 
-- **text**: Single-line text input
-- **textarea**: Multi-line text area
-- **select**: Dropdown selection
-- **radio**: Single choice from options
-- **checkbox**: Multiple choice from options
+| Field Type | Description | Example Use |
+|------------|-------------|-------------|
+| `text` | Single-line text input | Names, titles, short answers |
+| `email` | Email input with validation | Email addresses |
+| `textarea` | Multi-line text area | Messages, descriptions, feedback |
+| `select` | Dropdown menu | Categories, options, preferences |
+| `radio` | Single choice from options | Yes/No, ratings, single selection |
+| `checkbox` | Multiple choice from options | Features, interests, multiple selection |
 
-### Example Usage Flow
+## Environment Variables
 
-1. LLM calls `createForm` with a schema
-2. Server creates form and returns URL
-3. User visits URL and fills out form
-4. User submits form (can only submit once)
-5. LLM calls `getResponses` to retrieve the data
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MCP_PORT` | `3000` | Port for the form server |
+| `MCP_HOSTNAME` | `localhost` | Hostname for form URLs |
+| `NODE_ENV` | `development` | Environment mode |
 
-## Technical Details
+## Deployment Options
 
-### Architecture
-
-- **MCP Server**: Communicates via stdio transport
-- **HTTP Server**: Express.js server for form rendering
-- **Storage**: In-memory Map with JSON file persistence
-- **Security**: CSRF tokens, input validation, HTML escaping
-
-### File Structure
-
-```
-mcp-form-server/
-├── package.json
-├── tsconfig.json
-├── src/
-│   ├── index.ts          # MCP server entry point
-│   ├── http-server.ts    # Express server
-│   ├── storage.ts        # Data persistence
-│   ├── form-generator.ts # HTML generation
-│   └── types.ts          # TypeScript interfaces
-├── forms.json            # Persistent storage (created at runtime)
-└── README.md
-```
-
-### Data Persistence
-
-Forms are stored in memory and persisted to `forms.json`. The server:
-- Loads existing forms on startup
-- Saves to disk on every form update
-- Handles graceful shutdown (SIGTERM/SIGINT)
-
-### Security Features
-
-- CSRF protection using form ID as token
-- HTML escaping to prevent XSS
-- Input validation on both client and server
-- Required field enforcement
-
-## Connecting to MCP Clients
-
-### Claude Desktop
-
-1. **Open Configuration**:
-   - Open Claude Desktop Settings
-   - Navigate to "Developer" tab
-   - Click "Edit Config" to open the configuration file
-
-2. **Configuration File Location**:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-3. **Add Server Configuration**:
-   ```json
-   {
-     "mcpServers": {
-       "form-server": {
-         "command": "node",
-         "args": ["/path/to/form-mcp/dist/index.js"],
-         "env": {
-           "MCP_FORM_PORT": "3000"
-         }
-       }
-     }
-   }
-   ```
-
-4. **Restart Claude Desktop** to load the new configuration
-
-### Cursor
-
-[![Add to Cursor](https://cursor.directory/api/badge/mcp)](https://cursor.directory/mcp/form-mcp)
-
-1. **Open MCP Settings**:
-   - Open command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
-   - Search for "Cursor Settings"
-   - Navigate to Features → Model Context Protocol
-
-2. **Configuration Options**:
-   
-   **Global Configuration** (`~/.cursor/mcp.json`):
-   ```json
-   {
-     "mcpServers": {
-       "form-server": {
-         "command": "node",
-         "args": ["/path/to/form-mcp/dist/index.js"],
-         "env": {
-           "MCP_FORM_PORT": "3000"
-         }
-       }
-     }
-   }
-   ```
-   
-   **Project-Specific Configuration** (`.cursor/mcp.json` in project root):
-   ```json
-   {
-     "mcpServers": {
-       "form-server": {
-         "command": "node",
-         "args": ["./dist/index.js"],
-         "env": {
-           "MCP_FORM_PORT": "3000"
-         }
-       }
-     }
-   }
-   ```
-
-3. **Enable the Server**:
-   - Toggle the server on in MCP settings
-   - Look for a green dot indicating successful connection
-
-### LibreChat
-
-For LibreChat, configure the MCP server with a custom hostname:
-
-```json
-{
-  "mcpServers": {
-    "form-server": {
-      "command": "node",
-      "args": ["/path/to/form-mcp/dist/index.js"],
-      "env": {
-        "MCP_FORM_PORT": "3000",
-        "MCP_HOSTNAME": "http://homoiconicity.tail663e6.ts.net:3000"
-      }
-    }
-  }
-}
-```
-
-The `MCP_HOSTNAME` environment variable allows you to specify the full URL that will be used in form links, which is particularly useful when:
-- Running behind a reverse proxy
-- Using a custom domain or subdomain
-- Accessing the server from a different network
-
-### Other MCP Clients
-
-For other MCP-compatible clients, use this general configuration:
-
-```json
-{
-  "mcpServers": {
-    "form-server": {
-      "command": "node",
-      "args": ["/absolute/path/to/form-mcp/dist/index.js"],
-      "env": {
-        "MCP_FORM_PORT": "3000"
-      }
-    }
-  }
-}
-```
-
-### Prerequisites
-
-- Node.js installed on your system
-- Form MCP server built (`npm run build`)
-- Absolute path to the compiled server (`dist/index.js`)
-
-### Troubleshooting
-
-- **Server not connecting**: Ensure the path to `dist/index.js` is correct and absolute
-- **Port conflicts**: Change `MCP_FORM_PORT` if port 3000 is in use
-- **Permission issues**: Ensure the MCP client has permission to execute Node.js
-- **Build errors**: Run `npm run build` to ensure the TypeScript is compiled
-
-## Docker Deployment
-
-### Quick Start with Docker
-
-1. **Build and run with Docker Compose**:
-   ```bash
-   docker-compose up -d
-   ```
-
-2. **Access the server**:
-   - HTTP endpoint: `http://localhost:3000`
-   - Health check: `http://localhost:3000/health`
-
-### Docker Configuration
-
-The Docker setup includes:
-- Node.js 20 Alpine base image
-- Automatic TypeScript compilation
-- Health checks
-- Persistent data volume
-- Automatic restart on failure
-
-### Manual Docker Commands
+### Docker (Recommended)
 
 ```bash
-# Build the image
-docker build -t form-mcp .
+# Start the server
+docker compose up -d
 
-# Run the container
-docker run -d \
-  --name form-mcp-server \
-  -p 3000:3000 \
-  -v $(pwd)/forms.json:/app/forms.json \
-  -v $(pwd)/data:/data \
-  --restart unless-stopped \
-  form-mcp
-```
-
-### Autostart on System Boot
-
-#### Using systemd (Linux)
-
-1. **Copy the service file**:
-   ```bash
-   sudo cp systemd/form-mcp.service /etc/systemd/system/
-   ```
-
-2. **Update the WorkingDirectory path**:
-   ```bash
-   sudo sed -i 's|/path/to/form-mcp|'$(pwd)'|g' /etc/systemd/system/form-mcp.service
-   ```
-
-3. **Enable and start the service**:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable form-mcp.service
-   sudo systemctl start form-mcp.service
-   ```
-
-4. **Check service status**:
-   ```bash
-   sudo systemctl status form-mcp.service
-   ```
-
-#### Using Docker restart policy
-
-The `docker-compose.yml` includes `restart: unless-stopped` which will:
-- Automatically restart the container if it crashes
-- Start the container on system boot (if Docker daemon starts on boot)
-- Keep the container stopped if you manually stop it
-
-### Data Persistence
-
-Form data is persisted in two locations:
-- `./forms.json`: Main form storage file
-- `./data/`: Additional data directory
-
-These are mounted as volumes to survive container restarts.
-
-### Updating the Container
-
-```bash
-# Pull latest changes
-git pull
-
-# Rebuild and restart
-docker-compose down
-docker-compose build
-docker-compose up -d
-```
-
-### Container Logs
-
-```bash
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
-# View last 100 lines
-docker-compose logs --tail=100
+# Stop the server
+docker compose down
 ```
 
-## Development
+The server will be available at `http://localhost:3000` with persistent data storage.
 
-### Building
+### Native Node.js
 
 ```bash
-npm run build
+# Development
+pnpm dev
+
+# Production
+pnpm build
+pnpm start
 ```
 
-### Running in Development
+### Autostart on Boot (Linux)
 
 ```bash
-npm run dev
+# Copy systemd service file
+sudo cp systemd/form-mcp.service /etc/systemd/system/
+
+# Update paths in the service file
+sudo nano /etc/systemd/system/form-mcp.service
+
+# Enable and start
+sudo systemctl enable form-mcp.service
+sudo systemctl start form-mcp.service
 ```
 
-### Cleaning Build Files
+## Example Use Cases
 
-```bash
-npm run clean
+### Customer Feedback Form
 ```
+Create a feedback form with rating (1-5 radio buttons), category dropdown (Bug Report, Feature Request, General), and comment textarea.
+```
+
+### Event Registration
+```
+Create an event registration form with name, email, dietary restrictions (checkboxes), and special requests textarea.
+```
+
+### Survey Collection
+```
+Create a product survey with satisfaction rating, feature preferences (multiple checkboxes), and improvement suggestions.
+```
+
+## Troubleshooting
+
+### Server Won't Start
+- Check that Node.js 18+ is installed
+- Ensure port 3000 is available (`lsof -i :3000`)
+- Verify the build completed successfully (`pnpm build`)
+
+### MCP Client Connection Issues
+- Use absolute paths in configuration files
+- Restart your AI assistant after config changes
+- Check that the server process is running
+- Verify file permissions on the dist/index.js file
+
+### Forms Not Loading
+- Check the server logs for errors
+- Ensure the hostname is accessible from your browser
+- Verify the forms.json file has proper permissions
+
+### Docker Issues
+- Run `docker compose logs` to see error messages
+- Ensure Docker daemon is running
+- Check for port conflicts with `docker ps`
+
+## Getting Help
+
+- **Documentation**: See [ARCHITECTURE.md](./ARCHITECTURE.md) for technical details
+- **Contributing**: See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guide
+- **Issues**: Report bugs and request features on GitHub
+- **MCP Resources**: Visit [modelcontextprotocol.io](https://modelcontextprotocol.io/) for MCP documentation
 
 ## License
 
-MIT
+MIT License - see [LICENSE](./LICENSE) for details.

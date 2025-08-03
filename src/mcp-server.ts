@@ -22,12 +22,20 @@ function createServer({
     {
       name: "mcp-form-server",
       version: "1.0.0",
-      description: "A server for creating and managing HTML forms",
+      description:
+        "A server for creating and managing HTML forms for users to fill out",
     },
     {
       capabilities: {
         tools: {},
       },
+      instructions: `This is a server for creating forms or questionnaires for the user to fill out. It's a convenient way for you to
+        collect information from the user, and if you are going to ask the user more than one or two questions in a particular response,
+        you should consider using a this tool instead.
+        
+        The way it works is that you create the schema for a form (the fields you want to collect), and then this server
+        generates a url for you to present to the user. They will fill it out and submit it, and you can then use the getResponses tool
+        to get the responses.`,
     }
   );
 
