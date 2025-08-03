@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.17.1
+        version: 1.17.1
       express:
         specifier: ^4.19.2
         version: 4.21.2
@@ -15,12 +18,9 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: ^4.0.14
+        version: 4.0.14
     devDependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.17.1
-        version: 1.17.1
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.23
@@ -1072,6 +1072,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.0.14:
+    resolution: {integrity: sha512-nGFJTnJN6cM2v9kXL+SOBq3AtjQby3Mv5ySGFof5UGRHrRioSJ5iG680cYNjE/yWk671nROcpPj4hAS8nyLhSw==}
+
 snapshots:
 
   '@esbuild/aix-ppc64@0.25.8':
@@ -2098,3 +2101,5 @@ snapshots:
       zod: 3.25.76
 
   zod@3.25.76: {}
+
+  zod@4.0.14: {}
