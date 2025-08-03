@@ -12,27 +12,52 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## Quick Start
 
-### Installation
+### Installation & Setup
 
-1. **Install with pnpm** (recommended):
-   ```bash
-   git clone https://github.com/yourusername/form-mcp.git
-   cd form-mcp
-   pnpm install
-   pnpm build
-   ```
+#### Option 1: Docker (Recommended)
+Start the server with Docker Compose:
+```bash
+git clone https://github.com/yourusername/form-mcp.git
+cd form-mcp
+docker compose up -d
+```
 
-2. **Or with Docker**:
-   ```bash
-   git clone https://github.com/yourusername/form-mcp.git
-   cd form-mcp
-   docker compose up -d
-   ```
+This starts the server listening on:
+- **Port 3000**: Form HTTP server (for rendering forms)
+- **Port 3002**: MCP streamable HTTP endpoint
 
-### Configure Your AI Assistant
+#### Option 2: Native pnpm
+Run the server locally with Node.js:
+```bash
+git clone https://github.com/yourusername/form-mcp.git
+cd form-mcp
+pnpm install
+pnpm build
 
-#### Claude Desktop
+# Start with streamable HTTP transport
+MCP_TRANSPORT=streamable-http MCP_HTTP_PORT=3002 MCP_FORM_PORT=3000 pnpm start
+```
 
+The server will be available at `http://localhost:3002/mcp` for MCP connections.
+
+### Connect MCP Clients
+
+#### Claude Code (Official CLI)
+Add the server using the command line:
+```bash
+# For Docker setup
+claude mcp add --transport http form-mcp http://localhost:3002/mcp
+
+# For local pnpm setup  
+claude mcp add --transport http form-mcp http://localhost:3002/mcp
+```
+
+You can also set the scope to make it available across projects:
+```bash
+claude mcp add --transport http -s user form-mcp http://localhost:3002/mcp
+```
+
+#### Claude Desktop (Legacy stdio mode)
 Add to `claude_desktop_config.json`:
 
 ```json
@@ -42,7 +67,7 @@ Add to `claude_desktop_config.json`:
       "command": "node",
       "args": ["/absolute/path/to/form-mcp/dist/index.js"],
       "env": {
-        "MCP_PORT": "3000"
+        "MCP_TRANSPORT": "stdio"
       }
     }
   }
@@ -54,7 +79,6 @@ Add to `claude_desktop_config.json`:
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 #### Cursor
-
 Add to `.cursor/mcp.json` or global `~/.cursor/mcp.json`:
 
 ```json
@@ -64,15 +88,16 @@ Add to `.cursor/mcp.json` or global `~/.cursor/mcp.json`:
       "command": "node", 
       "args": ["/absolute/path/to/form-mcp/dist/index.js"],
       "env": {
-        "MCP_PORT": "3000"
+        "MCP_TRANSPORT": "stdio"
       }
     }
   }
 }
 ```
 
-#### LibreChat
+**Note**: Cursor currently has limited streamable HTTP support. Use stdio mode for now.
 
+#### LibreChat
 Add to `librechat.yaml`:
 
 ```yaml
@@ -86,6 +111,31 @@ mcpServers:
       Use createForm to generate forms with various field types.
       Use getResponses to check for submissions and retrieve data.
 ```
+
+### For Clients Without Streamable HTTP Support
+
+If your MCP client doesn't support streamable HTTP yet, use the `mcp-remote` adapter:
+
+#### Install mcp-remote
+```bash
+npm install -g mcp-remote
+```
+
+#### Configure your client
+Add to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "form-mcp": {
+      "command": "mcp-remote",
+      "args": ["http://localhost:3002/mcp"]
+    }
+  }
+}
+```
+
+This allows any MCP client to connect to the streamable HTTP server through a local stdio bridge.
 
 ## How It Works
 
@@ -135,8 +185,10 @@ The AI uses `getResponses` to check if the form was submitted and get the data:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MCP_PORT` | `3000` | Port for the form server |
-| `MCP_HOSTNAME` | `localhost` | Hostname for form URLs |
+| `MCP_TRANSPORT` | `stdio` | Transport mode: `stdio` or `streamable-http` |
+| `MCP_HTTP_PORT` | `3002` | Port for MCP streamable HTTP endpoint |
+| `MCP_FORM_PORT` | `3000` | Port for the form HTTP server |
+| `MCP_HOSTNAME` | `http://localhost:3000` | Base URL for form links |
 | `NODE_ENV` | `development` | Environment mode |
 
 ## Deployment Options
