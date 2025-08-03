@@ -10,7 +10,8 @@ import { randomUUID } from 'node:crypto';
 import { storage } from './storage.js';
 import { startHttpServer, createHttpServer } from './http-server.js';
 import { 
-  FormSchema, 
+  FormSchema,
+  FormField,
   CreateFormRequest, 
   CreateFormResponse, 
   GetResponsesRequest, 
@@ -35,7 +36,18 @@ const server = new McpServer(
 server.registerTool('createForm', {
   description: 'Create a new HTML form with the provided schema and return a form ID and URL',
   inputSchema: {
-    schema: z.any().describe('The form schema object containing title, description, and fields')
+    schema: z.object({
+      title: z.string().describe('The title of the form'),
+      description: z.string().optional().describe('Optional description for the form'),
+      fields: z.array(z.object({
+        id: z.string().optional().describe('Unique identifier for the field'),
+        name: z.string().optional().describe('Alternative to id - field name'),
+        label: z.string().describe('Display label for the field'),
+        type: z.enum(['text', 'textarea', 'select', 'radio', 'checkbox', 'email']).describe('Type of the form field'),
+        required: z.boolean().describe('Whether the field is required'),
+        options: z.array(z.string()).optional().describe('Options for select, radio, or checkbox fields')
+      })).describe('Array of form fields')
+    }).describe('The form schema object')
   }
 }, async ({ schema }) => {
   console.error('createForm received schema:', JSON.stringify(schema, null, 2));
@@ -43,18 +55,31 @@ server.registerTool('createForm', {
 
   try {
     // Normalize fields - ensure they have 'id' property (LibreChat might send 'name' instead)
-    for (const field of schema.fields) {
-      if (!field.id && (field as any).name) {
-        field.id = (field as any).name;
-      }
-      if (!field.id) {
+    const normalizedFields = schema.fields.map(field => {
+      const id = field.id || field.name;
+      if (!id) {
         throw new Error(`Field must have 'id' or 'name' property`);
       }
       
       if (['select', 'radio', 'checkbox'].includes(field.type) && (!field.options || field.options.length === 0)) {
         throw new Error(`Field type ${field.type} requires options array`);
       }
-    }
+      
+      return {
+        id,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        options: field.options
+      } as FormField;
+    });
+    
+    // Create normalized schema
+    const normalizedSchema: FormSchema = {
+      title: schema.title,
+      description: schema.description,
+      fields: normalizedFields
+    };
     
     // Generate unique form ID
     const formId = randomUUID();
@@ -64,12 +89,12 @@ server.registerTool('createForm', {
     
     // Store form
     storage.setForm(formId, {
-      schema,
+      schema: normalizedSchema,
       responses: null,
       submitted: false
     });
     
-    console.error(`Created form ${formId}: ${schema.title}`);
+    console.error(`Created form ${formId}: ${normalizedSchema.title}`);
     
     const response: CreateFormResponse = {
       formId,
@@ -102,14 +127,16 @@ server.registerTool('createForm', {
 server.registerTool('getResponses', {
   description: 'Get the submission status and responses for a form by its ID',
   inputSchema: {
-    formId: z.string().describe('The ID of the form to retrieve responses for')
+    schema: z.object({
+      formId: z.string().describe('The ID of the form to retrieve responses for')
+    }).describe('Parameters for retrieving form responses')
   }
-}, async ({ formId }) => {
+}, async ({ schema }) => {
   try {
-    const formData = await storage.getForm(formId);
+    const formData = await storage.getForm(schema.formId);
     
     if (!formData) {
-      throw new Error(`Form with ID ${formId} not found`);
+      throw new Error(`Form with ID ${schema.formId} not found`);
     }
     
     const response: GetResponsesResponse = {
