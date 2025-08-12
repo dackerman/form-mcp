@@ -1,6 +1,17 @@
 # Form MCP Server
 
+
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that enables AI assistants to create HTML forms, collect user responses, and retrieve submission data. Perfect for gathering structured information from users during AI conversations.
+
+## Example
+Here, an LLM has called the tool to generate a product feedback 
+<img width="888" height="727" alt="image" src="https://github.com/user-attachments/assets/efdd7cb1-2cd9-4f04-8db4-49a0eaa279c8" />
+
+Here's the resulting form that is rendered for the user to fill out.
+<img width="716" height="1341" alt="Rendered form" src="https://github.com/user-attachments/assets/c9904b4f-b16f-4eb7-9c22-f7550309ec44" />
+
+After submitting and telling the LLM it is done, the LLM can retrieve the info in a convenient JSON format.
+<img width="927" height="694" alt="Resulting response" src="https://github.com/user-attachments/assets/c2fabc98-bd04-4ba4-9819-33d3e8348214" />
 
 ## What It Does
 
